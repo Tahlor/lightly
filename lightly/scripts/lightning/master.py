@@ -18,6 +18,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor, TQDMProgressBar
 from torch.utils.data import Subset
 
+torch.set_float32_matmul_precision('medium')
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(description="Self-supervised learning with various models.")
@@ -65,6 +66,7 @@ def main(args):
         shuffle=True,
         drop_last=True,
         num_workers=args.num_workers,
+        persistent_workers=True
     )
 
     lr_monitor = LearningRateMonitor(logging_interval='step')

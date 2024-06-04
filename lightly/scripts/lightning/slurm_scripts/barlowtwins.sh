@@ -34,4 +34,4 @@ rsync -a --info=progress2 --timeout=1 $DATA_DIR/ $DEST_DIR
 which python
 nvidia-smi
 python -u $PARENT/master.py --model_name barlowtwins --dataset_path "/tmp/tarch/1950s448" --batch_size 200 \
---epochs 200 --num_workers 0 --max_items 100000
+--epochs 200 --num_workers 30 --max_items 100000
