@@ -63,29 +63,29 @@ class BYOL(pl.LightningModule):
     def configure_optimizers(self):
         return torch.optim.SGD(self.parameters(), lr=0.06)
 
+def main():
+    model = BYOL()
 
-model = BYOL()
+    # We disable resizing and gaussian blur for cifar10.
+    transform = BYOLTransform(
+        view_1_transform=BYOLView1Transform(input_size=32, gaussian_blur=0.0),
+        view_2_transform=BYOLView2Transform(input_size=32, gaussian_blur=0.0),
+    )
+    dataset = torchvision.datasets.CIFAR10(
+        "datasets/cifar10", download=True, transform=transform
+    )
+    # or create a dataset from a folder containing images or videos:
+    # dataset = LightlyDataset("path/to/folder", transform=transform)
 
-# We disable resizing and gaussian blur for cifar10.
-transform = BYOLTransform(
-    view_1_transform=BYOLView1Transform(input_size=32, gaussian_blur=0.0),
-    view_2_transform=BYOLView2Transform(input_size=32, gaussian_blur=0.0),
-)
-dataset = torchvision.datasets.CIFAR10(
-    "datasets/cifar10", download=True, transform=transform
-)
-# or create a dataset from a folder containing images or videos:
-# dataset = LightlyDataset("path/to/folder", transform=transform)
+    dataloader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=256,
+        shuffle=True,
+        drop_last=True,
+        num_workers=8,
+    )
 
-dataloader = torch.utils.data.DataLoader(
-    dataset,
-    batch_size=256,
-    shuffle=True,
-    drop_last=True,
-    num_workers=8,
-)
+    accelerator = "gpu" if torch.cuda.is_available() else "cpu"
 
-accelerator = "gpu" if torch.cuda.is_available() else "cpu"
-
-trainer = pl.Trainer(max_epochs=10, devices=1, accelerator=accelerator)
-trainer.fit(model=model, train_dataloaders=dataloader)
+    trainer = pl.Trainer(max_epochs=10, devices=1, accelerator=accelerator)
+    trainer.fit(model=model, train_dataloaders=dataloader)

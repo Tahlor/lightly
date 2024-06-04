@@ -64,26 +64,27 @@ class IJEPA(pl.LightningModule):
             for param_q, param_k in zip(self.encoder.parameters(), self.target_encoder.parameters()):
                 param_k.data.mul_(m).add_((1.0 - m) * param_q.detach().data)
 
-transform = IJEPATransform()
-collator = IJEPAMaskCollator(input_size=(224, 224), patch_size=32)
+def main():
+    transform = IJEPATransform()
+    collator = IJEPAMaskCollator(input_size=(224, 224), patch_size=32)
 
-#dataset = VOCDetection("datasets/pascal_voc", download=True, transform=transform, target_transform=lambda t: 0)
-dataset = torchvision.datasets.CIFAR10(
-    "datasets/cifar10", download=True, transform=transform
-)
-data_loader = torch.utils.data.DataLoader(dataset, collate_fn=collator, batch_size=10, persistent_workers=False)
+    #dataset = VOCDetection("datasets/pascal_voc", download=True, transform=transform, target_transform=lambda t: 0)
+    dataset = torchvision.datasets.CIFAR10(
+        "datasets/cifar10", download=True, transform=transform
+    )
+    data_loader = torch.utils.data.DataLoader(dataset, collate_fn=collator, batch_size=10, persistent_workers=False)
 
-vit_for_predictor = torchvision.models.vit_b_32(pretrained=False)
-vit_for_embedder = torchvision.models.vit_b_32(pretrained=False)
-ema = (0.996, 1.0)
-ipe_scale = 1.0
-ipe = len(data_loader)
-num_epochs = 10
-momentum_scheduler = (
-    ema[0] + i * (ema[1] - ema[0]) / (ipe * num_epochs * ipe_scale)
-    for i in range(int(ipe * num_epochs * ipe_scale) + 1)
-)
+    vit_for_predictor = torchvision.models.vit_b_32(pretrained=False)
+    vit_for_embedder = torchvision.models.vit_b_32(pretrained=False)
+    ema = (0.996, 1.0)
+    ipe_scale = 1.0
+    ipe = len(data_loader)
+    num_epochs = 10
+    momentum_scheduler = (
+        ema[0] + i * (ema[1] - ema[0]) / (ipe * num_epochs * ipe_scale)
+        for i in range(int(ipe * num_epochs * ipe_scale) + 1)
+    )
 
-model = IJEPA(vit_for_embedder, vit_for_predictor, momentum_scheduler, num_epochs, lr=1.5e-4)
-trainer = pl.Trainer(max_epochs=num_epochs, devices=1, accelerator='gpu' if torch.cuda.is_available() else 'cpu')
-trainer.fit(model, data_loader)
+    model = IJEPA(vit_for_embedder, vit_for_predictor, momentum_scheduler, num_epochs, lr=1.5e-4)
+    trainer = pl.Trainer(max_epochs=num_epochs, devices=1, accelerator='gpu' if torch.cuda.is_available() else 'cpu')
+    trainer.fit(model, data_loader)

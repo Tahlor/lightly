@@ -41,29 +41,29 @@ class SwaV(pl.LightningModule):
         optim = torch.optim.Adam(self.parameters(), lr=0.001)
         return optim
 
+def main():
+    model = SwaV()
 
-model = SwaV()
+    transform = SwaVTransform()
+    # we ignore object detection annotations by setting target_transform to return 0
+    dataset = torchvision.datasets.VOCDetection(
+        "datasets/pascal_voc",
+        download=True,
+        transform=transform,
+        target_transform=lambda t: 0,
+    )
+    # or create a dataset from a folder containing images or videos:
+    # dataset = LightlyDataset("path/to/folder")
 
-transform = SwaVTransform()
-# we ignore object detection annotations by setting target_transform to return 0
-dataset = torchvision.datasets.VOCDetection(
-    "datasets/pascal_voc",
-    download=True,
-    transform=transform,
-    target_transform=lambda t: 0,
-)
-# or create a dataset from a folder containing images or videos:
-# dataset = LightlyDataset("path/to/folder")
+    dataloader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=128,
+        shuffle=True,
+        drop_last=True,
+        num_workers=8,
+    )
 
-dataloader = torch.utils.data.DataLoader(
-    dataset,
-    batch_size=128,
-    shuffle=True,
-    drop_last=True,
-    num_workers=8,
-)
+    accelerator = "gpu" if torch.cuda.is_available() else "cpu"
 
-accelerator = "gpu" if torch.cuda.is_available() else "cpu"
-
-trainer = pl.Trainer(max_epochs=10, devices=1, accelerator=accelerator)
-trainer.fit(model=model, train_dataloaders=dataloader)
+    trainer = pl.Trainer(max_epochs=10, devices=1, accelerator=accelerator)
+    trainer.fit(model=model, train_dataloaders=dataloader)

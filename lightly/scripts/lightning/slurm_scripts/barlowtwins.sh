@@ -29,9 +29,8 @@ DATASET_NAME=$(basename $DATA_DIR)
 DEST_DIR="/tmp/tarch/$DATASET_NAME"
 
 mkdir -p $DEST_DIR
-#rsync -a $DATA_DIR/ $DEST_DIR
+rsync -a --info=progress2 --timeout=1 $DATA_DIR/ $DEST_DIR
 
 which python
 nvidia-smi
-python -u $PARENT/barlowtwins.py "/tmp/tarch/1950s448"
-
+python -u $PARENT/master.py --model_name barlow_twins --dataset_path "/tmp/tarch/datasets/1950s448" --batch_size 200
