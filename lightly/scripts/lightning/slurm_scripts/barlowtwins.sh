@@ -24,7 +24,7 @@ SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 PARENT="$(dirname "$SCRIPT_PATH")"
 
 export COMET_OFFLINE_DIRECTORY="./experiments/comet_offline"
-DATA_DIR="/nobackup/scratch/usr/tarch/datasets/1950s448"
+DATA_DIR="/home/tarch/datasets/1950s448"
 DATASET_NAME=$(basename $DATA_DIR)
 DEST_DIR="/tmp/tarch/$DATASET_NAME"
 
@@ -33,4 +33,5 @@ rsync -a --info=progress2 --timeout=1 $DATA_DIR/ $DEST_DIR
 
 which python
 nvidia-smi
-python -u $PARENT/master.py --model_name barlow_twins --dataset_path "/tmp/tarch/datasets/1950s448" --batch_size 200
+python -u $PARENT/master.py --model_name barlowtwins --dataset_path "/tmp/tarch/1950s448" --batch_size 200 \
+--epochs 200 --num_workers 0 --max_items 100000
