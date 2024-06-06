@@ -70,7 +70,7 @@ def main(args):
     )
 
     lr_monitor = LearningRateMonitor(logging_interval='step')
-    progress_bar = TQDMProgressBar(refresh_rate=50)
+    progress_bar = TQDMProgressBar(refresh_rate=5)
 
     accelerator = "gpu" if torch.cuda.is_available() else "cpu"
     trainer = pl.Trainer(
@@ -79,6 +79,7 @@ def main(args):
         accelerator=accelerator,
         callbacks=[lr_monitor, progress_bar],
         log_every_n_steps=50,
+        default_root_dir=f"./{args.model_name}"
     )
     trainer.fit(model=model, train_dataloaders=dataloader)
 

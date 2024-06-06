@@ -48,8 +48,9 @@ class BarlowTwins(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optim = torch.optim.SGD(self.parameters(), lr=0.06)
-        return optim
+        optim = torch.optim.AdamW(self.parameters(), lr=0.01)
+        scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=100, gamma=0.1)
+        return optim, scheduler
 
 def main(dataset_path):
     model = BarlowTwins()
